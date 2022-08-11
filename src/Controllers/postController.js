@@ -229,23 +229,33 @@ const getPostLikedByUser = async function (req, res) {
 
 const updatePost = async function(req, res){
     try{
-
+        const user_id = req.params.userId;
         const post_id = req.params.postId;
         const {text, status} = req.body
         if(!isValidObjectId(post_id)){
             return res.status(400).send({ status: false, message: "Please Provide valid post id" });   
         }
 
-        if(!isValidObjectId(req.body)){
+        if(!isValidRequestBody(req.body)){
             return res.status(400).send({ status: false, message: "Body can not be empty while updation" });
         }
 
-        if(!isValid(text)){
+        if(text && !isValid(text)){
             return res.status(400).send({ status: false, message: "Please Provide valid string" });
         }
 
-        if(!isValidProfile(status)){
+        if(status && !isValidProfile(status)){
             return res.status(400).send({ status: false, message: "Please Provide valid status, private or public" });
+        }
+
+        const postExist = await postModel.findOne({_id: post_id, isDeleted :false});
+
+        if(!postExist){
+            return res.status(404).send({ status: false, message: "Post does not exist" });
+     
+        }
+        if(postExist.userId.toString() !== user_id){
+            return res.status(403).send({ status: false, message: "Unauthorised Access" });
         }
 
         const update_post = await postModel.findByIdAndUpdate(
@@ -256,7 +266,7 @@ const updatePost = async function(req, res){
             {new : true}
         );
 
-        return res.status(200).send({status : false, data : updatePost});
+        return res.status(200).send({status : true, data : update_post});
 
     }
     catch (error) {

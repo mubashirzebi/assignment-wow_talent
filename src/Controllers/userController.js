@@ -116,7 +116,7 @@ const loginUser = async function (req, res) {
             exp: Math.floor(Date.now() / 1000) + 72 * 60 * 60
         }, 'IronMan')
 
-        res.status(200).send({ status: true, messsge: "User Login Successful", data: { userId: user.user_id, token: token } });
+        res.status(200).send({ status: true, messsge: "User Login Successful", data: { userId: user._id, token: token } });
     }
     catch (error) {
         console.log(error)
@@ -352,7 +352,7 @@ const updateProfile = async function (req, res) {
         const update_profile = await userModel.findByIdAndUpdate(
             { _id: user_id },
             {
-                $set: { name: name, user_name: user_name, gender: gender, email: email, profile: profile, password: password }
+                $set: { name: name, user_name: user_name, gender: gender, email: email, profile: profile, password: password, mobile : mobile }
             },
             { new: true }
         )
