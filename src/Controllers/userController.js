@@ -2,7 +2,8 @@
 const userModel = require('../Models/userModel');
 const jwt = require('jsonwebtoken')
 
-const { isValid, isValidPassword, isValidRequestBody, isValidMobileNumber, isValidEmail, isValidProfile, isValidGender, isValidObjectId } = require('../Validations/validation')
+const { isValid, isValidPassword, isValidRequestBody, isValidMobileNumber, isValidEmail, isValidProfile, isValidGender, isValidObjectId } = require('../Validations/validation');
+const postModel = require('../Models/postModel');
 
 const createUser = async function (req, res) {
 
@@ -231,6 +232,8 @@ const getProfile = async function (req, res) {
 
         }
 
+
+
         return res.status(200).send({ status: true, data: data })
 
     }
@@ -241,6 +244,29 @@ const getProfile = async function (req, res) {
     }
 
 
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+const getUserWhoLikeMyPost = async function(req,res){
+    try{
+
+        const user_id = req.params.userId;
+
+        const findUser = await postModel.aggregate(
+            [
+                {$match : {userId : user_id}},
+                {$group : {_id : "$userId", "users" : {$addToSet : "$like"}}}
+            ]
+        )
+
+        return res.status(200).send({ status: true, data: findUser })
+
+    }
+    catch (error) {
+        console.log(error)
+        res.status(500).send({ status: false, error: error.message });
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -344,4 +370,4 @@ const updateProfile = async function (req, res) {
 
 
 
-module.exports = { createUser, loginUser, follow_unfollow, getProfile, updateProfile }
+module.exports = { createUser, loginUser, follow_unfollow, getProfile, updateProfile, getUserWhoLikeMyPost }
